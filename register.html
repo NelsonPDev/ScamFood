@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - SCAMFOOD</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --danger: #f72585;
+            --success: #4ade80;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .register-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        .register-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .register-header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .register-body {
+            padding: 40px;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 15px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+        }
+        
+        .input-group-text {
+            background-color: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-right: none;
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+            padding: 14px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(67, 97, 238, 0.3);
+        }
+        
+        .btn-register:disabled {
+            opacity: 0.7;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        
+        .allergen-tag {
+            display: inline-block;
+            background: #f0f7ff;
+            color: var(--primary);
+            padding: 8px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .allergen-tag.selected {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        .allergen-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .progress-bar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .step-indicator {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin: 0 auto 10px;
+            transition: all 0.3s;
+        }
+        
+        .step-indicator.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .step-indicator.completed {
+            background: var(--success);
+            color: white;
+        }
+        
+        .password-strength {
+            height: 5px;
+            margin-top: 5px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .strength-weak { background: var(--danger); width: 25%; }
+        .strength-fair { background: #ffa500; width: 50%; }
+        .strength-good { background: #ffd700; width: 75%; }
+        .strength-strong { background: var(--success); width: 100%; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        
+        .shake {
+            animation: shake 0.5s;
+        }
+        
+        .terms-checkbox {
+            cursor: pointer;
+        }
+        
+        .terms-checkbox input {
+            margin-right: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .register-body {
+                padding: 30px 20px;
+            }
+            
+            .register-header {
+                padding: 30px 20px;
+            }
+            
+            .register-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="register-card">
+                    <div class="register-header">
+                        <h1><i class="fas fa-user-plus"></i> Crear Cuenta en SCAMFOOD</h1>
+                        <p class="mb-0">Comienza tu viaje hacia una alimentación más segura</p>
+                    </div>
+                    
+                    <div class="register-body">
+                        <!-- Progress Bar -->
+                        <div class="mb-5">
+                            <div class="progress mb-4" style="height: 8px;">
+                                <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-3">
+                                    <div class="step-indicator active" id="step1">1</div>
+                                    <small>Información Personal</small>
+                                </div>
+                                <div class="col-3">
+                                    <div class="step-indicator" id="step2">2</div>
+                                    <small>Alérgenos</small>
+                                </div>
+                                <div class="col-3">
+                                    <div class="step-indicator" id="step3">3</div>
+                                    <small>Contraseña</small>
+                                </div>
+                                <div class="col-3">
+                                    <div class="step-indicator" id="step4">4</div>
+                                    <small>Confirmación</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Error Message -->
+                        <div id="errorMessage" class="alert alert-danger d-none" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <span id="errorText"></span>
+                        </div>
+                        
+                        <!-- Success Message -->
+                        <div id="successMessage" class="alert alert-success d-none" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <span id="successText"></span>
+                        </div>
+                        
+                        <!-- Multi-step Form -->
+                        <form id="registerForm">
+                            <!-- Step 1: Personal Information -->
+                            <div class="step" id="step1Content">
+                                <h3 class="mb-4"><i class="fas fa-user me-2"></i> Información Personal</h3>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="nombre" class="form-label">Nombre Completo *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                            <input type="text" class="form-control" id="nombre" required
+                                                   placeholder="Ej: Juan Pérez">
+                                        </div>
+                                        <div class="invalid-feedback">Por favor ingresa tu nombre completo</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Correo Electrónico *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                            <input type="email" class="form-control" id="email" required
+                                                   placeholder="ejemplo@correo.com">
+                                        </div>
+                                        <div class="invalid-feedback">Por favor ingresa un email válido</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="telefono" class="form-label">Teléfono</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                                            <input type="tel" class="form-control" id="telefono"
+                                                   placeholder="Ej: 5512345678">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="fecha_nacimiento" class="form-label">Fecha de Nacimiento</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-birthday-cake"></i></span>
+                                            <input type="date" class="form-control" id="fecha_nacimiento">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-secondary" disabled>Anterior</button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                                        Siguiente <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 2: Allergens -->
+                            <div class="step d-none" id="step2Content">
+                                <h3 class="mb-4"><i class="fas fa-allergies me-2"></i> Selecciona Tus Alérgenos</h3>
+                                <p class="text-muted mb-4">Selecciona los alimentos a los que eres alérgico. Esto nos ayudará a protegerte mejor.</p>
+                                
+                                <div class="mb-4">
+                                    <h5>Alérgenos Comunes</h5>
+                                    <div id="commonAllergens" class="mb-3">
+                                        <!-- Los alérgenos se cargarán con JavaScript -->
+                                    </div>
+                                    
+                                    <h5>Otros Alérgenos</h5>
+                                    <div class="input-group mb-3">
+                                        <input type="text" class="form-control" id="customAllergen" 
+                                               placeholder="Escribe un alérgeno personalizado">
+                                        <button class="btn btn-outline-primary" type="button" onclick="addCustomAllergen()">
+                                            <i class="fas fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                    <div id="customAllergensList" class="mb-4"></div>
+                                    
+                                    <div id="selectedAllergens" class="p-3 bg-light rounded">
+                                        <h6>Alérgenos Seleccionados:</h6>
+                                        <div id="selectedAllergensList">
+                                            <p class="text-muted mb-0">No has seleccionado ningún alérgeno</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Puedes agregar o eliminar alérgenos más tarde desde tu perfil.
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep(1)">
+                                        <i class="fas fa-arrow-left me-1"></i> Anterior
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                                        Siguiente <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 3: Password -->
+                            <div class="step d-none" id="step3Content">
+                                <h3 class="mb-4"><i class="fas fa-lock me-2"></i> Configura tu Contraseña</h3>
+                                
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="password" class="form-label">Contraseña *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                            <input type="password" class="form-control" id="password" required
+                                                   oninput="checkPasswordStrength()">
+                                            <button class="btn btn-outline-secondary" type="button" 
+                                                    onclick="togglePassword('password')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="password-strength" id="passwordStrength"></div>
+                                        <div class="form-text">
+                                            <small>La contraseña debe tener al menos 8 caracteres</small>
+                                        </div>
+                                        <div class="invalid-feedback">La contraseña es demasiado débil</div>
+                                    </div>
+                                    
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirmPassword" class="form-label">Confirmar Contraseña *</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                            <input type="password" class="form-control" id="confirmPassword" required>
+                                            <button class="btn btn-outline-secondary" type="button" 
+                                                    onclick="togglePassword('confirmPassword')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="invalid-feedback">Las contraseñas no coinciden</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <h5>Requisitos de Seguridad:</h5>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="lengthCheck" disabled>
+                                        <label class="form-check-label" for="lengthCheck">
+                                            Al menos 8 caracteres
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="uppercaseCheck" disabled>
+                                        <label class="form-check-label" for="uppercaseCheck">
+                                            Al menos una mayúscula
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="numberCheck" disabled>
+                                        <label class="form-check-label" for="numberCheck">
+                                            Al menos un número
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="specialCheck" disabled>
+                                        <label class="form-check-label" for="specialCheck">
+                                            Al menos un carácter especial (!@#$%^&*)
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep(2)">
+                                        <i class="fas fa-arrow-left me-1"></i> Anterior
+                                    </button>
+                                    <button type="button" class="btn btn-primary" onclick="nextStep(4)">
+                                        Siguiente <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Step 4: Confirmation -->
+                            <div class="step d-none" id="step4Content">
+                                <h3 class="mb-4"><i class="fas fa-check-circle me-2"></i> Confirmar Registro</h3>
+                                
+                                <div class="card mb-4">
+                                    <div class="card-body">
+                                        <h5>Resumen de tu Información:</h5>
+                                        <table class="table table-borderless">
+                                            <tr>
+                                                <th width="30%">Nombre:</th>
+                                                <td id="summaryNombre"></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Email:</th>
+                                                <td id="summaryEmail"></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Teléfono:</th>
+                                                <td id="summaryTelefono"></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Alérgenos:</th>
+                                                <td id="summaryAllergens"></td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <div class="form-check terms-checkbox">
+                                        <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                                        <label class="form-check-label" for="termsCheck">
+                                            Acepto los <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">Términos y Condiciones</a> 
+                                            y la <a href="#" data-bs-toggle="modal" data-bs-target="#privacyModal">Política de Privacidad</a> *
+                                        </label>
+                                        <div class="invalid-feedback">Debes aceptar los términos y condiciones</div>
+                                    </div>
+                                    
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" type="checkbox" id="newsletterCheck">
+                                        <label class="form-check-label" for="newsletterCheck">
+                                            Deseo recibir notificaciones sobre actualizaciones y consejos de salud
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <button type="button" class="btn btn-secondary" onclick="prevStep(3)">
+                                        <i class="fas fa-arrow-left me-1"></i> Anterior
+                                    </button>
+                                    <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+                                        <i class="fas fa-user-plus me-2"></i> Crear Cuenta
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                        
+                        <div class="text-center mt-4">
+                            <p>¿Ya tienes una cuenta? <a href="login.html">Inicia Sesión aquí</a></p>
+                            <p><a href="index.html"><i class="fas fa-arrow-left me-1"></i> Volver al inicio</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Terms Modal -->
+    <div class="modal fade" id="termsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Términos y Condiciones</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. Aceptación de los Términos</h6>
+                    <p>Al registrarte en SCAMFOOD, aceptas estos términos y condiciones...</p>
+                    <!-- Agrega más contenido según sea necesario -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Privacy Modal -->
+    <div class="modal fade" id="privacyModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Política de Privacidad</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>1. Información que Recopilamos</h6>
+                    <p>SCAMFOOD recopila la información necesaria para brindar el servicio...</p>
+                    <!-- Agrega más contenido según sea necesario -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // Variables globales
+        let currentStep = 1;
+        let selectedAllergens = [];
+        let commonAllergens = [
+            'Gluten', 'Lactosa', 'Huevo', 'Pescado', 'Mariscos', 
+            'Frutos secos', 'Maní', 'Soja', 'Sésamo', 'Mostaza',
+            'Apio', 'Dióxido de azufre', 'Altramuces', 'Moluscos'
+        ];
+        
+        // Inicializar al cargar la página
+        $(document).ready(function() {
+            loadCommonAllergens();
+            updateProgressBar();
+        });
+        
+        // Cargar alérgenos comunes
+        function loadCommonAllergens() {
+            const container = $('#commonAllergens');
+            let html = '';
+            
+            commonAllergens.forEach(allergen => {
+                html += `
+                    <span class="allergen-tag" onclick="toggleAllergen('${allergen}')">
+                        <i class="fas fa-plus-circle me-1"></i> ${allergen}
+                    </span>
+                `;
+            });
+            
+            container.html(html);
+        }
+        
+        // Manejar selección de alérgenos
+        function toggleAllergen(allergen) {
+            const index = selectedAllergens.indexOf(allergen);
+            
+            if (index === -1) {
+                selectedAllergens.push(allergen);
+            } else {
+                selectedAllergens.splice(index, 1);
+            }
+            
+            updateSelectedAllergens();
+            updateAllergenTags();
+        }
+        
+        // Actualizar lista de alérgenos seleccionados
+        function updateSelectedAllergens() {
+            const container = $('#selectedAllergensList');
+            
+            if (selectedAllergens.length === 0) {
+                container.html('<p class="text-muted mb-0">No has seleccionado ningún alérgeno</p>');
+                return;
+            }
+            
+            let html = '<div class="d-flex flex-wrap gap-2">';
+            selectedAllergens.forEach(allergen => {
+                html += `
+                    <span class="badge bg-primary p-2">
+                        ${allergen} 
+                        <button type="button" class="btn-close btn-close-white ms-1" 
+                                onclick="removeAllergen('${allergen}')" style="font-size: 0.7rem;"></button>
+                    </span>
+                `;
+            });
+            html += '</div>';
+            
+            container.html(html);
+        }
+        
+        // Actualizar estado visual de los tags
+        function updateAllergenTags() {
+            $('.allergen-tag').each(function() {
+                const allergenText = $(this).text().replace('+', '').trim();
+                const isSelected = selectedAllergens.includes(allergenText);
+                
+                if (isSelected) {
+                    $(this).addClass('selected');
+                    $(this).html(`<i class="fas fa-check-circle me-1"></i> ${allergenText}`);
+                } else {
+                    $(this).removeClass('selected');
+                    $(this).html(`<i class="fas fa-plus-circle me-1"></i> ${allergenText}`);
+                }
+            });
+        }
+        
+        // Eliminar alérgeno
+        function removeAllergen(allergen) {
+            const index = selectedAllergens.indexOf(allergen);
+            if (index !== -1) {
+                selectedAllergens.splice(index, 1);
+                updateSelectedAllergens();
+                updateAllergenTags();
+            }
+        }
+        
+        // Agregar alérgeno personalizado
+        function addCustomAllergen() {
+            const input = $('#customAllergen');
+            const allergen = input.val().trim();
+            
+            if (allergen && !selectedAllergens.includes(allergen)) {
+                selectedAllergens.push(allergen);
+                input.val('');
+                updateSelectedAllergens();
+                
+                // Agregar a la lista personalizada
+                const customList = $('#customAllergensList');
+                customList.append(`
+                    <span class="badge bg-info p-2 me-2 mb-2">
+                        ${allergen}
+                        <button type="button" class="btn-close btn-close-white ms-1" 
+                                onclick="removeAllergen('${allergen}')" style="font-size: 0.7rem;"></button>
+                    </span>
+                `);
+            }
+        }
+        
+        // Navegación entre pasos
+        function nextStep(step) {
+            if (!validateStep(currentStep)) {
+                showError('Por favor completa todos los campos requeridos correctamente');
+                return;
+            }
+            
+            $(`#step${currentStep}Content`).addClass('d-none');
+            $(`#step${step}Content`).removeClass('d-none');
+            
+            $(`#step${currentStep}`).removeClass('active').addClass('completed');
+            $(`#step${step}`).addClass('active');
+            
+            currentStep = step;
+            updateProgressBar();
+            updateSummary();
+        }
+        
+        function prevStep(step) {
+            $(`#step${currentStep}Content`).addClass('d-none');
+            $(`#step${step}Content`).removeClass('d-none');
+            
+            $(`#step${currentStep}`).removeClass('active');
+            $(`#step${step}`).addClass('active');
+            
+            currentStep = step;
+            updateProgressBar();
+        }
+        
+        // Actualizar barra de progreso
+        function updateProgressBar() {
+            const progress = (currentStep / 4) * 100;
+            $('#progressBar').css('width', `${progress}%`);
+        }
+        
+        // Validar paso actual
+        function validateStep(step) {
+            switch(step) {
+                case 1:
+                    const nombre = $('#nombre').val().trim();
+                    const email = $('#email').val().trim();
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    
+                    if (!nombre) {
+                        $('#nombre').addClass('is-invalid');
+                        return false;
+                    }
+                    
+                    if (!email || !emailRegex.test(email)) {
+                        $('#email').addClass('is-invalid');
+                        return false;
+                    }
+                    
+                    return true;
+                    
+                case 3:
+                    const password = $('#password').val();
+                    const confirmPassword = $('#confirmPassword').val();
+                    
+                    if (password.length < 8) {
+                        $('#password').addClass('is-invalid');
+                        return false;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        $('#confirmPassword').addClass('is-invalid');
+                        return false;
+                    }
+                    
+                    return true;
+                    
+                case 4:
+                    if (!$('#termsCheck').prop('checked')) {
+                        $('#termsCheck').addClass('is-invalid');
+                        return false;
+                    }
+                    
+                    return true;
+                    
+                default:
+                    return true;
+            }
+        }
+        
+        // Actualizar resumen
+        function updateSummary() {
+            if (currentStep === 4) {
+                $('#summaryNombre').text($('#nombre').val());
+                $('#summaryEmail').text($('#email').val());
+                $('#summaryTelefono').text($('#telefono').val() || 'No especificado');
+                $('#summaryAllergens').text(selectedAllergens.join(', ') || 'Ninguno seleccionado');
+            }
+        }
+        
+        // Verificar fortaleza de contraseña
+        function checkPasswordStrength() {
+            const password = $('#password').val();
+            const strengthBar = $('#passwordStrength');
+            const checks = {
+                length: $('#lengthCheck'),
+                uppercase: $('#uppercaseCheck'),
+                number: $('#numberCheck'),
+                special: $('#specialCheck')
+            };
+            
+            // Reiniciar
+            strengthBar.removeClass('strength-weak strength-fair strength-good strength-strong');
+            Object.values(checks).forEach(check => {
+                check.prop('checked', false);
+                check.removeClass('text-success');
+            });
+            
+            if (password.length === 0) {
+                $('#password').removeClass('is-invalid is-valid');
+                return;
+            }
+            
+            let strength = 0;
+            
+            // Longitud mínima
+            if (password.length >= 8) {
+                checks.length.prop('checked', true).addClass('text-success');
+                strength++;
+            }
+            
+            // Mayúsculas
+            if (/[A-Z]/.test(password)) {
+                checks.uppercase.prop('checked', true).addClass('text-success');
+                strength++;
+            }
+            
+            // Números
+            if (/[0-9]/.test(password)) {
+                checks.number.prop('checked', true).addClass('text-success');
+                strength++;
+            }
+            
+            // Caracteres especiales
+            if (/[!@#$%^&*]/.test(password)) {
+                checks.special.prop('checked', true).addClass('text-success');
+                strength++;
+            }
+            
+            // Actualizar barra visual
+            let strengthClass = '';
+            if (strength === 1) {
+                strengthClass = 'strength-weak';
+            } else if (strength === 2) {
+                strengthClass = 'strength-fair';
+            } else if (strength === 3) {
+                strengthClass = 'strength-good';
+            } else if (strength === 4) {
+                strengthClass = 'strength-strong';
+            }
+            
+            strengthBar.addClass(strengthClass);
+            
+            // Validar campo
+            if (strength >= 3) {
+                $('#password').removeClass('is-invalid').addClass('is-valid');
+            } else {
+                $('#password').addClass('is-invalid').removeClass('is-valid');
+            }
+        }
+        
+        // Mostrar/ocultar contraseña
+        function togglePassword(fieldId) {
+            const field = $(`#${fieldId}`);
+            const type = field.attr('type') === 'password' ? 'text' : 'password';
+            field.attr('type', type);
+        }
+        
+        // Mostrar error
+        function showError(message) {
+            $('#errorText').text(message);
+            $('#errorMessage').removeClass('d-none').addClass('shake');
+            setTimeout(() => {
+                $('#errorMessage').removeClass('shake');
+            }, 500);
+            
+            // Scroll al error
+            $('html, body').animate({
+                scrollTop: $('#errorMessage').offset().top - 100
+            }, 500);
+        }
+        
+        // Mostrar éxito
+        function showSuccess(message) {
+            $('#successText').text(message);
+            $('#successMessage').removeClass('d-none');
+        }
+        
+        // Manejar envío del formulario
+        $('#registerForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateStep(4)) {
+                showError('Debes aceptar los términos y condiciones');
+                return;
+            }
+            
+            // Deshabilitar botón
+            $('#submitBtn').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span> Creando cuenta...');
+            
+            // Preparar datos
+            const formData = {
+                nombre: $('#nombre').val().trim(),
+                email: $('#email').val().trim(),
+                telefono: $('#telefono').val().trim(),
+                fecha_nacimiento: $('#fecha_nacimiento').val(),
+                password: $('#password').val(),
+                alergenos: selectedAllergens,
+                newsletter: $('#newsletterCheck').prop('checked') ? 1 : 0
+            };
+            
+            // Enviar datos al servidor
+            $.ajax({
+                url: 'php/register.php',
+                method: 'POST',
+                data: formData,
+                success: function(response) {
+                    try {
+                        const data = JSON.parse(response);
+                        
+                        if (data.success) {
+                            showSuccess('¡Cuenta creada exitosamente! Redirigiendo...');
+                            
+                            // Mostrar alerta de éxito
+                            Swal.fire({
+                                title: '¡Registro Exitoso!',
+                                text: data.message,
+                                icon: 'success',
+                                confirmButtonText: 'Continuar',
+                                timer: 3000,
+                                timerProgressBar: true
+                            }).then(() => {
+                                // Redirigir al login
+                                window.location.href = 'login.html';
+                            });
+                        } else {
+                            showError(data.message);
+                            $('#submitBtn').prop('disabled', false).html('<i class="fas fa-user-plus me-2"></i> Crear Cuenta');
+                        }
+                    } catch (e) {
+                        showError('Error en la respuesta del servidor');
+                        $('#submitBtn').prop('disabled', false).html('<i class="fas fa-user-plus me-2"></i> Crear Cuenta');
+                    }
+                },
+                error: function() {
+                    showError('Error de conexión con el servidor');
+                    $('#submitBtn').prop('disabled', false).html('<i class="fas fa-user-plus me-2"></i> Crear Cuenta');
+                }
+            });
+        });
+        
+        // Validación en tiempo real
+        $('input').on('input', function() {
+            $(this).removeClass('is-invalid is-valid');
+            
+            if ($(this).attr('id') === 'password') {
+                checkPasswordStrength();
+                
+                // Validar confirmación
+                const password = $('#password').val();
+                const confirm = $('#confirmPassword').val();
+                
+                if (confirm && password !== confirm) {
+                    $('#confirmPassword').addClass('is-invalid');
+                } else if (confirm && password === confirm) {
+                    $('#confirmPassword').removeClass('is-invalid').addClass('is-valid');
+                }
+            }
+            
+            if ($(this).attr('id') === 'confirmPassword') {
+                const password = $('#password').val();
+                const confirm = $(this).val();
+                
+                if (password && confirm && password !== confirm) {
+                    $(this).addClass('is-invalid');
+                } else if (password && confirm && password === confirm) {
+                    $(this).removeClass('is-invalid').addClass('is-valid');
+                }
+            }
+            
+            if ($(this).attr('id') === 'email') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if ($(this).val() && !emailRegex.test($(this).val())) {
+                    $(this).addClass('is-invalid');
+                } else if ($(this).val() && emailRegex.test($(this).val())) {
+                    $(this).removeClass('is-invalid').addClass('is-valid');
+                }
+            }
+        });
+        
+        // Validar términos
+        $('#termsCheck').on('change', function() {
+            $(this).removeClass('is-invalid');
+        });
+        
+        // Permitir Enter para agregar alérgeno personalizado
+        $('#customAllergen').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                addCustomAllergen();
+            }
+        });
+    </script>
+</body>
+</html>

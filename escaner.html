@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escanear Producto - Escáner de Alérgenos</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QuaggaJS para escanear códigos de barras -->
+    <script src="https://cdn.jsdelivr.net/npm/quagga/dist/quagga.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .scanner-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .scanner-window {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .scanner-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        #scanner {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            position: relative;
+        }
+        .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 200px;
+            border: 2px solid #00ff00;
+            box-shadow: 0 0 0 1000px rgba(0,0,0,0.7);
+            z-index: 10;
+        }
+        .scanner-guide {
+            color: white;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        .result-card {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .allergen-alert {
+            animation: pulse 2s infinite;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 54, 92, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(245, 54, 92, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 54, 92, 0); }
+        }
+        .btn-scan-again {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            transition: all 0.3s;
+        }
+        .btn-scan-again:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar (similar al dashboard) -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="dashboard.html">
+                <i class="fas fa-allergies"></i> Escáner de Alérgenos
+            </a>
+            <div class="d-flex align-items-center">
+                <a href="dashboard.html" class="btn btn-outline-light me-2">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container scanner-container">
+        <h1 class="text-center mb-4"><i class="fas fa-barcode"></i> Escanear Producto</h1>
+        <p class="text-center text-muted mb-5">Enfoca el código de barras del producto dentro del área de escaneo</p>
+        
+        <div class="scanner-window">
+            <div class="scanner-header">
+                <h3 class="mb-0">Escáner de Código de Barras</h3>
+            </div>
+            <div id="scanner">
+                <div class="scanner-overlay"></div>
+                <div class="scanner-guide">
+                    <p><i class="fas fa-info-circle"></i> Coloca el código de barras dentro del marco verde</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mb-4">
+            <button id="startScanner" class="btn btn-lg btn-success me-2">
+                <i class="fas fa-play"></i> Iniciar Escáner
+            </button>
+            <button id="stopScanner" class="btn btn-lg btn-danger" disabled>
+                <i class="fas fa-stop"></i> Detener Escáner
+            </button>
+            <button id="manualInput" class="btn btn-lg btn-outline-primary ms-2">
+                <i class="fas fa-keyboard"></i> Ingresar Manualmente
+            </button>
+        </div>
+        
+        <!-- Resultados -->
+        <div id="resultCard" class="card result-card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <img id="productImage" src="" class="img-fluid rounded mb-3" alt="Producto" style="max-height: 200px;">
+                        <h4 id="productName">Cargando...</h4>
+                        <p id="productBrand" class="text-muted"></p>
+                    </div>
+                    <div class="col-md-8">
+                        <h3 class="mb-4">Resultado del Análisis</h3>
+                        
+                        <div id="safeResult" class="alert alert-success" style="display: none;">
+                            <h4><i class="fas fa-check-circle"></i> ¡Producto Seguro!</h4>
+                            <p>Este producto no contiene ninguno de tus alérgenos registrados.</p>
+                        </div>
+                        
+                        <div id="dangerResult" class="alert alert-danger allergen-alert" style="display: none;">
+                            <h4><i class="fas fa-exclamation-triangle"></i> ¡ADVERTENCIA!</h4>
+                            <p>Este producto contiene los siguientes alérgenos:</p>
+                            <ul id="dangerAllergensList"></ul>
+                        </div>
+                        
+                        <div id="allergensInfo">
+                            <h5>Ingredientes detectados:</h5>
+                            <div id="allergensList" class="mb-4"></div>
+                            
+                            <h5>Información nutricional (por 100g):</h5>
+                            <div id="nutritionInfo" class="mb-4"></div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button id="saveProduct" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Guardar Resultado
+                            </button>
+                            <button id="scanAgain" class="btn btn-scan-again">
+                                <i class="fas fa-redo"></i> Escanear Otro
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal para ingreso manual -->
+        <div class="modal fade" id="manualModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Ingresar Código Manualmente</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="barcodeInput" class="form-label">Código de Barras (EAN/UPC)</label>
+                            <input type="text" class="form-control" id="barcodeInput" placeholder="Ej: 123456789012">
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Puedes encontrar el código de barras en el empaque del producto.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="submitBarcode">Buscar Producto</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Script del escáner -->
+    <script src="js/scanner.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Verificar autenticación
+            checkAuth();
+            
+            // Inicializar el escáner
+            initScanner();
+            
+            // Manejar botones
+            $('#startScanner').on('click', startScanner);
+            $('#stopScanner').on('click', stopScanner);
+            $('#manualInput').on('click', function() {
+                $('#manualModal').modal('show');
+            });
+            
+            $('#submitBarcode').on('click', function() {
+                const barcode = $('#barcodeInput').val().trim();
+                if (barcode.length >= 8) {
+                    $('#manualModal').modal('hide');
+                    stopScanner();
+                    analyzeProduct(barcode);
+                } else {
+                    Swal.fire('Error', 'Por favor ingresa un código de barras válido', 'error');
+                }
+            });
+            
+            $('#scanAgain').on('click', function() {
+                $('#resultCard').hide();
+                $('#startScanner').prop('disabled', false);
+                $('#stopScanner').prop('disabled', true);
+                $('#scanner').show();
+            });
+            
+            $('#saveProduct').on('click', saveProductResult);
+        });
+        
+        function checkAuth() {
+            $.ajax({
+                url: 'php/check_auth.php',
+                method: 'GET',
+                success: function(response) {
+                    const data = JSON.parse(response);
+                    if (!data.loggedIn) {
+                        window.location.href = 'login.html';
+                    }
+                },
+                error: function() {
+                    window.location.href = 'login.html';
+                }
+            });
+        }
+        
+        function initScanner() {
+            // Configuración básica del escáner
+            window.scannerConfig = {
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#scanner'),
+                    constraints: {
+                        width: 640,
+                        height: 480,
+                        facingMode: "environment"
+                    },
+                },
+                decoder: {
+                    readers: [
+                        "ean_reader",
+                        "ean_8_reader",
+                        "upc_reader",
+                        "upc_e_reader",
+                        "code_128_reader"
+                    ]
+                },
+                locate: true,
+                debug: {
+                    drawBoundingBox: true,
+                    showFrequency: false,
+                    drawScanline: true,
+                    showPattern: true
+                }
+            };
+        }
+        
+        function startScanner() {
+            Quagga.init(window.scannerConfig, function(err) {
+                if (err) {
+                    console.error(err);
+                    Swal.fire('Error', 'No se pudo inicializar la cámara', 'error');
+                    return;
+                }
+                
+                Quagga.start();
+                $('#startScanner').prop('disabled', true);
+                $('#stopScanner').prop('disabled', false);
+                
+                // Detectar códigos
+                Quagga.onDetected(function(data) {
+                    if (data.codeResult && data.codeResult.code) {
+                        const barcode = data.codeResult.code;
+                        stopScanner();
+                        analyzeProduct(barcode);
+                    }
+                });
+            });
+        }
+        
+        function stopScanner() {
+            Quagga.stop();
+            $('#startScanner').prop('disabled', false);
+            $('#stopScanner').prop('disabled', true);
+        }
+        
+        function analyzeProduct(barcode) {
+            Swal.fire({
+                title: 'Analizando producto...',
+                text: 'Buscando información en nuestra base de datos',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            $.ajax({
+                url: 'php/get_product.php',
+                method: 'POST',
+                data: { barcode: barcode },
+                success: function(response) {
+                    Swal.close();
+                    const data = JSON.parse(response);
+                    
+                    if (data.success) {
+                        displayProductInfo(data.product, data.containsAllergens, data.detectedAllergens);
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error', 'Error de conexión con el servidor', 'error');
+                }
+            });
+        }
+        
+        function displayProductInfo(product, containsAllergens, detectedAllergens) {
+            // Mostrar información del producto
+            $('#productName').text(product.product_name || 'Producto desconocido');
+            $('#productBrand').text(product.brands || 'Marca no especificada');
+            
+            if (product.image_url) {
+                $('#productImage').attr('src', product.image_url).show();
+            } else {
+                $('#productImage').attr('src', 'https://via.placeholder.com/300x300?text=Sin+imagen').show();
+            }
+            
+            // Mostrar alérgenos
+            let allergensHtml = '';
+            if (product.allergens) {
+                const allergens = product.allergens.split(',').map(a => a.trim());
+                allergens.forEach(allergen => {
+                    const isDangerous = detectedAllergens.includes(allergen.toLowerCase());
+                    allergensHtml += `<span class="badge ${isDangerous ? 'bg-danger' : 'bg-secondary'} me-1 mb-1">${allergen}</span>`;
+                });
+            } else {
+                allergensHtml = '<p class="text-muted">No se detectaron alérgenos específicos</p>';
+            }
+            $('#allergensList').html(allergensHtml);
+            
+            // Mostrar información nutricional
+            let nutritionHtml = '';
+            if (product.nutriments) {
+                const nutriments = product.nutriments;
+                nutritionHtml = `
+                    <div class="row">
+                        <div class="col-6">Energía: ${nutriments.energy || 'N/A'} kcal</div>
+                        <div class="col-6">Grasas: ${nutriments.fat || 'N/A'}g</div>
+                        <div class="col-6">Carbohidratos: ${nutriments.carbohydrates || 'N/A'}g</div>
+                        <div class="col-6">Proteínas: ${nutriments.proteins || 'N/A'}g</div>
+                        <div class="col-6">Azúcares: ${nutriments.sugars || 'N/A'}g</div>
+                        <div class="col-6">Sal: ${nutriments.salt || 'N/A'}g</div>
+                    </div>
+                `;
+            } else {
+                nutritionHtml = '<p class="text-muted">Información nutricional no disponible</p>';
+            }
+            $('#nutritionInfo').html(nutritionHtml);
+            
+            // Mostrar resultado de seguridad
+            if (containsAllergens) {
+                $('#safeResult').hide();
+                $('#dangerResult').show();
+                
+                let dangerList = '';
+                detectedAllergens.forEach(allergen => {
+                    dangerList += `<li><strong>${allergen.toUpperCase()}</strong> - Presente en este producto</li>`;
+                });
+                $('#dangerAllergensList').html(dangerList);
+            } else {
+                $('#dangerResult').hide();
+                $('#safeResult').show();
+            }
+            
+            // Mostrar la tarjeta de resultados
+            $('#scanner').hide();
+            $('#resultCard').show();
+            
+            // Guardar el código escaneado para luego
+            window.lastScannedBarcode = product.code;
+            window.lastProductData = product;
+        }
+        
+        function saveProductResult() {
+            $.ajax({
+                url: 'php/save_scan.php',
+                method: 'POST',
+                data: {
+                    barcode: window.lastScannedBarcode,
+                    product_name: window.lastProductData.product_name,
+                    contains_allergens: $('#dangerResult').is(':visible')
+                },
+                success: function(response) {
+                    const data = JSON.parse(response);
+                    if (data.success) {
+                        Swal.fire('¡Guardado!', 'El resultado se ha guardado en tu historial', 'success');
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
