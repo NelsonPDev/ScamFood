@@ -1,36 +1,47 @@
 <?php
 session_start();
 
-// Configuración de la base de datos
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');      // Usuario por defecto de XAMPP
-define('DB_PASS', '');          // Contraseña vacía por defecto
-define('DB_NAME', 'scamfood_db'); // Nombre de tu base de datos
-
 // API de Open Food Facts
 define('OFF_API_URL', 'https://world.openfoodfacts.org/api/v0/product/');
 
-// URL base de la aplicación
+
 define('BASE_URL', 'http://localhost/SCAMFOOD/');
 
 // Tiempo de expiración de sesión (en segundos)
 define('SESSION_TIMEOUT', 3600); // 1 hora
 
-// Conexión a la base de datos
-try {
-    $pdo = new PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-        DB_USER,
-        DB_PASS,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false
-        ]
-    );
-} catch (PDOException $e) {
-    die("Error de conexión a la base de datos: " . $e->getMessage());
+class Database {
+    private $host = "localhost:3307";
+    private $db_name = "scamfood_db";
+    private $username = "root";
+    private $password = "";
+    public $conn;
+
+    public function getConnection() {
+        $this->conn = null;
+        try {
+            $this->conn = new PDO(
+                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8mb4",
+                $this->username, 
+                $this->password,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false
+                ]
+            );
+            error_log("✅ Conexión a MySQL exitosa en puerto 3307");
+        } catch(PDOException $exception) {
+            error_log("Error de conexión: " . $exception->getMessage());
+            throw new Exception("Error de conexión a la base de datos: " . $exception->getMessage());
+        }
+        return $this->conn;
+    }
 }
+
+// Crear instancia de la base de datos
+$database = new Database();
+$pdo = $database->getConnection();
 
 // Verificar si el usuario está autenticado
 function isLoggedIn() {
